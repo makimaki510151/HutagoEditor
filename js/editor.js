@@ -14,21 +14,25 @@ class LevelEditor {
     this.camera = { x: 0, y: 0 };
     this.isDrawing = false;
     this.eraseMode = false;
+    this.eraseToolActive = false;
     /** @type {'A'|'B'|null} */
     this.dragSpawn = null;
+    /** @type {Map<number, { x: number, y: number }>} */
+    this._pointers = new Map();
+    /** @type {{ x: number, y: number } | null} */
+    this._panPrev = null;
 
     this._onPointerDown = (e) => this.pointerDown(e);
     this._onPointerMove = (e) => this.pointerMove(e);
-    this._onPointerUp = () => {
-      this.isDrawing = false;
-      this.dragSpawn = null;
-    };
+    this._onPointerUp = (e) => this.pointerUp(e);
+    this._onPointerCancel = (e) => this.pointerUp(e);
     this._onWheel = (e) => this.onWheel(e);
     this._onContext = (e) => e.preventDefault();
 
     this.canvas.addEventListener('pointerdown', this._onPointerDown);
     this.canvas.addEventListener('pointermove', this._onPointerMove);
     window.addEventListener('pointerup', this._onPointerUp);
+    window.addEventListener('pointercancel', this._onPointerCancel);
     this.canvas.addEventListener('wheel', this._onWheel, { passive: false });
     this.canvas.addEventListener('contextmenu', this._onContext);
 
@@ -77,6 +81,21 @@ class LevelEditor {
     if (on) this.selectedTile = 4;
   }
 
+  /** @param {boolean} on */
+  setEraseTool(on) {
+    this.eraseToolActive = on;
+  }
+
+  /** @returns {{ x: number, y: number } | null} */
+  pointerCentroid() {
+    const pts = [...this._pointers.values()];
+    if (pts.length < 2) return null;
+    return {
+      x: pts.reduce((s, p) => s + p.x, 0) / pts.length,
+      y: pts.reduce((s, p) => s + p.y, 0) / pts.length,
+    };
+  }
+
   /** @param {PointerEvent} e */
   worldPos(e) {
     const rect = this.canvas.getBoundingClientRect();
@@ -95,9 +114,25 @@ class LevelEditor {
 
   /** @param {PointerEvent} e */
   pointerDown(e) {
+    this._pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (this._pointers.size >= 2) {
+      for (const pid of this._pointers.keys()) {
+        try {
+          this.canvas.releasePointerCapture(pid);
+        } catch {
+          /* not captured */
+        }
+      }
+      this.isDrawing = false;
+      this.dragSpawn = null;
+      this._panPrev = this.pointerCentroid();
+      return;
+    }
+
     this.canvas.setPointerCapture(e.pointerId);
     this.isDrawing = true;
-    this.eraseMode = e.button === 2;
+    this.eraseMode = this.eraseToolActive || e.button === 2;
 
     if (this.spawnMode && e.button === 0) {
       const { x, y } = this.worldPos(e);
@@ -111,12 +146,40 @@ class LevelEditor {
 
   /** @param {PointerEvent} e */
   pointerMove(e) {
+    if (this._pointers.has(e.pointerId)) {
+      this._pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    }
+
+    if (this._pointers.size >= 2) {
+      const c = this.pointerCentroid();
+      if (c && this._panPrev) {
+        const rect = this.canvas.getBoundingClientRect();
+        const scaleX = this.canvas.width / rect.width;
+        const scaleY = this.canvas.height / rect.height;
+        this.camera.x -= (c.x - this._panPrev.x) * scaleX;
+        this.camera.y -= (c.y - this._panPrev.y) * scaleY;
+        this.clampCamera();
+        this.draw();
+      }
+      this._panPrev = this.pointerCentroid();
+      return;
+    }
+
     if (!this.isDrawing) return;
     if (this.dragSpawn) {
       this.moveSpawn(e);
       return;
     }
     this.applyAt(e);
+  }
+
+  /** @param {PointerEvent} e */
+  pointerUp(e) {
+    this._pointers.delete(e.pointerId);
+    if (this._pointers.size < 2) this._panPrev = null;
+    if (this._pointers.size > 0) return;
+    this.isDrawing = false;
+    this.dragSpawn = null;
   }
 
   /** @param {PointerEvent} e */
@@ -288,7 +351,7 @@ class LevelEditor {
 
     const modeLabel = this.spawnMode ? 'スポーン配置' : getTile(this.selectedTile).name;
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillRect(8, h - 44, 380, 36);
+    ctx.fillRect(8, h - 44, Math.min(380, w - 16), 36);
     ctx.fillStyle = '#475569';
     ctx.font = '12px sans-serif';
     ctx.fillText(

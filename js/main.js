@@ -61,8 +61,26 @@
 
   levelSelect.addEventListener('change', () => loadBuiltin(levelSelect.value));
 
-  document.getElementById('btn-restart')?.addEventListener('click', () => {
+  function restartGame() {
     game.reset(!!game.respawn);
+  }
+
+  document.getElementById('btn-restart')?.addEventListener('click', restartGame);
+  document.getElementById('btn-restart-touch')?.addEventListener('click', restartGame);
+
+  document.getElementById('btn-rotate-left')?.addEventListener('click', () => {
+    if (game.state === 'playing') game.swapPivot(-1);
+  });
+
+  document.getElementById('btn-rotate-right')?.addEventListener('click', () => {
+    if (game.state === 'playing') game.swapPivot(1);
+  });
+
+  const eraseToggle = document.getElementById('btn-erase-toggle');
+  eraseToggle?.addEventListener('click', () => {
+    const on = eraseToggle.getAttribute('aria-pressed') !== 'true';
+    eraseToggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    editor.setEraseTool(on);
   });
 
   document.getElementById('level-import')?.addEventListener('change', async (e) => {

@@ -31,6 +31,7 @@ class HutagoGame {
     this.checkpointFx = 0;
     this.checkpointFxPos = { x: 0, y: 0 };
     this._gamepadPrev = { left: false, right: false, x: false };
+    this._coarsePointer = window.matchMedia('(pointer: coarse)');
 
     this._last = 0;
     this._boundLoop = (t) => this.loop(t);
@@ -176,15 +177,21 @@ class HutagoGame {
   }
 
   /** 軸・周回側のQ/Eレイアウト（接続線に垂直） */
+  /** タッチ端末では Q/E の当たり判定を広げる */
+  controlHitScale() {
+    return this._coarsePointer.matches ? 1.55 : 1;
+  }
+
   getPivotControlLayout() {
     const px = this.pivot === 'A' ? this.ax : this.bx;
     const py = this.pivot === 'A' ? this.ay : this.by;
     const ox = this.pivot === 'A' ? this.bx : this.ax;
     const oy = this.pivot === 'A' ? this.by : this.ay;
     const angle = this.angle;
+    const s = this.controlHitScale();
     return {
-      pivot: this.getControlsAt(px, py, angle, 50, 18, 32),
-      orbiter: this.getControlsAt(ox, oy, angle, 36, 11, 22),
+      pivot: this.getControlsAt(px, py, angle, 50, 18, 32 * s),
+      orbiter: this.getControlsAt(ox, oy, angle, 36, 11, 22 * s),
     };
   }
 
@@ -215,7 +222,8 @@ class HutagoGame {
     const dx = wx - p.x;
     const dy = wy - p.y;
     const qSide = Math.sin(layout.pivot.angle) * dx - Math.cos(layout.pivot.angle) * dy;
-    if (Math.abs(qSide) < 18) return 0;
+    const sideDead = 18 * this.controlHitScale();
+    if (Math.abs(qSide) < sideDead) return 0;
     return qSide > 0 ? -1 : 1;
   }
 

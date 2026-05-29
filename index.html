@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>ふたご回転 — 2Dスクロール</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
@@ -18,8 +18,15 @@
 
     <section id="play-panel" class="panel active">
       <div class="play-layout">
-        <div class="canvas-wrap canvas-wrap--play">
-          <canvas id="game-canvas" width="1280" height="720"></canvas>
+        <div class="play-stage">
+          <div class="canvas-wrap canvas-wrap--play">
+            <canvas id="game-canvas" width="1280" height="720"></canvas>
+          </div>
+          <div class="play-touch-controls" aria-label="タッチ操作">
+            <button type="button" id="btn-rotate-left" class="touch-btn touch-btn--q" aria-label="左回りで軸切替 (Q)">↺ 左</button>
+            <button type="button" id="btn-restart-touch" class="touch-btn touch-btn--r" aria-label="リスタート (R)">再開</button>
+            <button type="button" id="btn-rotate-right" class="touch-btn touch-btn--e" aria-label="右回りで軸切替 (E)">右 ↻</button>
+          </div>
         </div>
         <aside class="play-sidebar">
           <label class="field">
@@ -31,15 +38,16 @@
             <input type="file" id="level-import" accept=".json,application/json">
           </label>
           <button type="button" id="btn-restart" class="btn">リスタート (R)</button>
-          <div class="help">
-            <h3>操作</h3>
+          <details class="help help-details" open>
+            <summary>操作</summary>
             <ul>
-              <li><kbd>Q</kbd> / 十字← … 左回りで軸切替</li>
-              <li><kbd>E</kbd> / 十字→ … 右回りで軸切替</li>
-              <li><kbd>R</kbd> / <kbd>X</kbd> … リスタート</li>
+              <li><kbd>Q</kbd> / 十字← / 画面下「左」… 左回りで軸切替</li>
+              <li><kbd>E</kbd> / 十字→ / 画面下「右」… 右回りで軸切替</li>
+              <li><kbd>R</kbd> / <kbd>X</kbd> / 「再開」… リスタート</li>
+              <li class="touch-hint">キャンバス上の Q/E ボタンをタップしても切替できます</li>
             </ul>
             <p class="hint">軸の左右に出る Q/E を押すと、その方向へ周回開始。紫「線」=連結線が触れると死。赤「体」=A/Bが触れると死。</p>
-          </div>
+          </details>
           <div id="status" class="status">準備中…</div>
         </aside>
       </div>
@@ -82,6 +90,7 @@
           <button type="button" id="btn-apply" class="btn primary">適用</button>
 
           <div class="edit-tools">
+            <button type="button" id="btn-erase-toggle" class="btn small" aria-pressed="false">消しゴム</button>
             <button type="button" id="btn-fill-empty" class="btn small">空で塗りつぶし</button>
           </div>
 
@@ -96,8 +105,8 @@
           </div>
 
           <p class="hint edit-hint">
-            左ドラッグ: 描画 / 右ドラッグ: 消去<br>
-            ホイール: 縦 / Shift+ホイール: 横<br>
+            左ドラッグ: 描画 / 右ドラッグ: 消去（スマホは「消しゴム」）<br>
+            ホイール: 縦 / Shift+ホイール: 横（スマホは2本指ドラッグで移動）<br>
             「スポーン配置」: A・Bをドラッグ（ブロックは置きません）
           </p>
         </aside>

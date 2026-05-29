@@ -22,12 +22,17 @@ html, body {
   font-family: "Segoe UI", "Hiragino Sans", "Yu Gothic UI", sans-serif;
   background: linear-gradient(165deg, #e0f2fe 0%, #f8fafc 45%, #fef3c7 100%);
   color: var(--text);
+  -webkit-text-size-adjust: 100%;
+  touch-action: manipulation;
 }
 
 #app {
   max-width: min(100%, 1680px);
   margin: 0 auto;
   padding: 12px 16px 24px;
+  padding-left: max(16px, env(safe-area-inset-left));
+  padding-right: max(16px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
 }
 
 .top-bar {
@@ -64,6 +69,8 @@ html, body {
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.95rem;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .tab.active {
@@ -114,14 +121,17 @@ html, body {
   aspect-ratio: 960 / 640;
 }
 
-#edit-canvas {
-  aspect-ratio: 960 / 640;
+.play-stage {
+  flex: 1 1 720px;
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .canvas-wrap--play {
   position: relative;
-  flex: 1 1 720px;
-  min-width: 0;
   width: 100%;
 }
 
@@ -130,21 +140,138 @@ html, body {
   aspect-ratio: 16 / 9;
   touch-action: none;
   user-select: none;
-}
-
-@media (max-width: 900px) {
-  .play-layout {
-    flex-direction: column;
-  }
-
-  .canvas-wrap--play {
-    flex: none;
-    width: 100%;
-  }
+  -webkit-user-select: none;
 }
 
 #edit-canvas {
   aspect-ratio: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.play-touch-controls {
+  display: none;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.touch-btn {
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 700;
+  min-height: 52px;
+  padding: 10px 12px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.touch-btn:active {
+  transform: scale(0.97);
+  background: #e0f2fe;
+}
+
+.touch-btn--q {
+  border-color: #7dd3fc;
+  color: #0369a1;
+}
+
+.touch-btn--e {
+  border-color: #7dd3fc;
+  color: #0369a1;
+}
+
+.touch-btn--r {
+  min-width: 5.5rem;
+  background: #f1f5f9;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+@media (max-width: 900px), (pointer: coarse) {
+  .play-touch-controls {
+    display: grid;
+  }
+
+  .touch-hint {
+    display: list-item;
+  }
+}
+
+.touch-hint {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  #app {
+    padding-top: max(8px, env(safe-area-inset-top));
+  }
+
+  .top-bar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .top-bar h1 {
+    font-size: 1.15rem;
+  }
+
+  .mode-tabs {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .tab {
+    flex: 1;
+    padding: 10px 12px;
+  }
+
+  .play-layout,
+  .edit-layout {
+    flex-direction: column;
+  }
+
+  .play-stage {
+    flex: none;
+    width: 100%;
+  }
+
+  .play-sidebar,
+  .edit-sidebar {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+  }
+
+  .canvas-wrap--edit {
+    width: 100%;
+  }
+
+  .palette {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .help-details summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #0369a1;
+    padding: 4px 0;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .help-details:not([open]) .hint,
+  .help-details:not([open]) ul {
+    display: none;
+  }
 }
 
 .play-sidebar {
@@ -214,6 +341,15 @@ html, body {
   font-size: 0.9rem;
   width: 100%;
   margin-bottom: 8px;
+  min-height: 44px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn[aria-pressed="true"] {
+  background: #fecaca;
+  border-color: #f87171;
+  color: #991b1b;
+  font-weight: 600;
 }
 
 .btn:hover {
@@ -229,16 +365,33 @@ html, body {
 
 .btn.small {
   width: auto;
-  padding: 4px 10px;
+  padding: 8px 12px;
   font-size: 0.8rem;
   margin-bottom: 0;
+  min-height: 44px;
 }
 
-.help h3,
+.help-details,
 .edit-sidebar h3 {
   margin: 0 0 8px;
   font-size: 0.95rem;
   color: #0369a1;
+}
+
+.help-details summary {
+  list-style: none;
+}
+
+.help-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.help-details summary::before {
+  content: "▸ ";
+}
+
+.help-details[open] summary::before {
+  content: "▾ ";
 }
 
 .help ul {
@@ -303,7 +456,8 @@ kbd {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 8px;
+  padding: 8px 10px;
+  min-height: 44px;
   border: 2px solid transparent;
   border-radius: 8px;
   background: #f8fafc;
@@ -311,6 +465,7 @@ kbd {
   cursor: pointer;
   font-size: 0.75rem;
   text-align: left;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .palette button .swatch {
