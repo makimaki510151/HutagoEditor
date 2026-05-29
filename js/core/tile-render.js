@@ -104,15 +104,15 @@ function drawBodyDeathTile(ctx, x, y, size) {
   ctx.fillRect(x, y, s, s);
 
   const labels = [
-    { letter: 'A', x: cx - s * 0.22 },
-    { letter: 'B', x: cx + s * 0.22 },
+    { letter: 'A', color: '#3b82f6', x: cx - s * 0.22 },
+    { letter: 'B', color: '#ec4899', x: cx + s * 0.22 },
   ];
 
   for (const item of labels) {
     const bx = item.x;
     const by = y + s * 0.62;
 
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = item.color;
     ctx.beginPath();
     ctx.arc(bx, by, s * 0.14, 0, Math.PI * 2);
     ctx.fill();
