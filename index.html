@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ふたご回転 — 2Dスクロール</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app">
+    <header class="top-bar">
+      <h1>ふたご回転</h1>
+      <nav class="mode-tabs">
+        <button type="button" id="tab-play" class="tab active">プレイ</button>
+        <button type="button" id="tab-edit" class="tab">エディタ</button>
+      </nav>
+    </header>
+
+    <section id="play-panel" class="panel active">
+      <div class="play-layout">
+        <div class="canvas-wrap canvas-wrap--play">
+          <canvas id="game-canvas" width="1280" height="720"></canvas>
+        </div>
+        <aside class="play-sidebar">
+          <label class="field">
+            <span>レベル</span>
+            <select id="level-select"></select>
+          </label>
+          <label class="field">
+            <span>JSON読込</span>
+            <input type="file" id="level-import" accept=".json,application/json">
+          </label>
+          <button type="button" id="btn-restart" class="btn">リスタート (R)</button>
+          <div class="help">
+            <h3>操作</h3>
+            <ul>
+              <li><kbd>Q</kbd> / 十字← … 左回りで軸切替</li>
+              <li><kbd>E</kbd> / 十字→ … 右回りで軸切替</li>
+              <li><kbd>R</kbd> / <kbd>X</kbd> … リスタート</li>
+            </ul>
+            <p class="hint">軸の左右に出る Q/E を押すと、その方向へ周回開始。紫「線」=連結線が触れると死。赤「体」=A/Bが触れると死。</p>
+          </div>
+          <div id="status" class="status">準備中…</div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="edit-panel" class="panel">
+      <div class="edit-layout">
+        <div class="canvas-wrap canvas-wrap--edit">
+          <canvas id="edit-canvas" width="960" height="640"></canvas>
+        </div>
+        <aside class="edit-sidebar">
+          <h3>タイル</h3>
+          <div id="tile-palette" class="palette"></div>
+
+          <label class="field">
+            <span>ステージ名</span>
+            <input type="text" id="level-name" maxlength="64" placeholder="ステージ名">
+          </label>
+
+          <label class="field">
+            <span>回転距離 (px)</span>
+            <input type="number" id="orbit-radius" min="40" max="400" value="120" step="1">
+          </label>
+
+          <label class="field">
+            <span>回転速度 (rad/s)</span>
+            <input type="number" id="orbit-speed" min="0.5" max="8" value="2.2" step="0.1">
+          </label>
+
+          <label class="field">
+            <span>グリッド（マス数）</span>
+            <div class="field-row">
+              <span>横</span>
+              <input type="number" id="grid-cols" min="4" max="200" value="40">
+              <span>縦</span>
+              <input type="number" id="grid-rows" min="4" max="120" value="30">
+            </div>
+          </label>
+
+          <button type="button" id="btn-apply" class="btn primary">適用</button>
+
+          <div class="edit-tools">
+            <button type="button" id="btn-fill-empty" class="btn small">空で塗りつぶし</button>
+          </div>
+
+          <div class="io-block">
+            <button type="button" id="btn-export" class="btn">JSON出力</button>
+            <button type="button" id="btn-download" class="btn">ファイル保存</button>
+            <label class="field">
+              <span>JSON読込</span>
+              <input type="file" id="edit-import" accept=".json,application/json">
+            </label>
+            <textarea id="level-json" rows="6" placeholder="エクスポートされたJSON"></textarea>
+          </div>
+
+          <p class="hint edit-hint">
+            左ドラッグ: 描画 / 右ドラッグ: 消去<br>
+            ホイール: 縦 / Shift+ホイール: 横<br>
+            「スポーン配置」: A・Bをドラッグ（ブロックは置きません）
+          </p>
+        </aside>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/core/tiles.js"></script>
+  <script src="js/core/tile-render.js"></script>
+  <script src="js/core/collision.js"></script>
+  <script src="js/core/spawn.js"></script>
+  <script src="js/levels/level-data.js"></script>
+  <script src="js/levels/builtin.js"></script>
+  <script src="js/editor.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
