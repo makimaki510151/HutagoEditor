@@ -40,13 +40,23 @@
           <button type="button" id="btn-restart" class="btn">リスタート (R)</button>
           <details class="help help-details" open>
             <summary>操作</summary>
-            <ul>
-              <li><kbd>Q</kbd> / 十字← / 画面下「左」… 左回りで軸切替</li>
-              <li><kbd>E</kbd> / 十字→ / 画面下「右」… 右回りで軸切替</li>
-              <li><kbd>R</kbd> / <kbd>X</kbd> / 「再開」… リスタート</li>
-              <li class="touch-hint">キャンバス上の Q/E ボタンをタップしても切替できます</li>
+            <p class="hint controls-lead">キーボード・ゲームパッド（コントローラー）・タッチのいずれでも操作できます。</p>
+            <ul class="controls-list">
+              <li>
+                <span class="controls-kind">キーボード</span>
+                <kbd>Q</kbd> 左回り／<kbd>E</kbd> 右回り／<kbd>R</kbd> リスタート
+              </li>
+              <li>
+                <span class="controls-kind">ゲームパッド</span>
+                <span class="pad-label">十字キー <span class="pad-dpad" aria-hidden="true">← →</span></span> で軸切替（Q/E と同じ）／
+                <span class="pad-label"><span class="pad-face">X</span> ボタン</span> でリスタート（R と同じ）
+              </li>
+              <li class="touch-hint">
+                <span class="controls-kind">タッチ</span>
+                画面下の「左」「右」「再開」、またはキャンバス上の Q/E ボタン
+              </li>
             </ul>
-            <p class="hint">軸の左右に出る Q/E を押すと、その方向へ周回開始。紫「線」=連結線が触れると死。赤「体」=A/Bが触れると死。</p>
+            <p class="hint">軸の左右に出る Q/E を押すと、その方向へ周回開始。縁が黒黄の縞＋水色の線＝連結線が触れると死。縁が黒黄の縞＋A/B＝キャラが触れると死。</p>
           </details>
           <div id="status" class="status">準備中…</div>
         </aside>

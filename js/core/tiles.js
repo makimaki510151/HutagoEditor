@@ -28,7 +28,7 @@ const TILES = {
     goal: false,
     editor: true,
   },
-  3: { id: 3, name: 'ゴール', color: '#4ade80', solid: false, lethalLink: false, lethalBody: false, goal: true, editor: true },
+  3: { id: 3, name: 'ゴール', color: '#e5e7eb', solid: false, lethalLink: false, lethalBody: false, goal: true, editor: true },
   4: { id: 4, name: 'スポーン配置', color: '#60a5fa', solid: false, lethalLink: false, lethalBody: false, goal: false, editor: true, spawnTool: true },
   5: { id: 5, name: '中間P', color: '#fbbf24', solid: false, lethalLink: false, lethalBody: false, goal: false, editor: true },
   6: {

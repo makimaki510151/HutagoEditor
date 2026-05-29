@@ -1,20 +1,56 @@
+/** @type {CanvasPattern | null} */
+let hazardStripePattern = null;
+
 /**
+ * 黒×黄の警告縞パターン（即死タイルの縁用）
  * @param {CanvasRenderingContext2D} ctx
- * @param {number} cx
- * @param {number} cy
- * @param {number} half
- * @param {number} lineWidth
  */
-function drawRedX(ctx, cx, cy, half, lineWidth = 3) {
-  ctx.strokeStyle = '#dc2626';
-  ctx.lineWidth = lineWidth;
-  ctx.lineCap = 'round';
+function getHazardStripePattern(ctx) {
+  if (hazardStripePattern) return hazardStripePattern;
+  const tile = 10;
+  const pat = document.createElement('canvas');
+  pat.width = tile;
+  pat.height = tile;
+  const p = pat.getContext('2d');
+  if (!p) return '#facc15';
+  p.fillStyle = '#facc15';
+  p.fillRect(0, 0, tile, tile);
+  p.strokeStyle = '#111827';
+  p.lineWidth = 4;
+  p.beginPath();
+  p.moveTo(-tile, tile);
+  p.lineTo(tile * 2, -tile);
+  p.moveTo(-tile, tile * 2);
+  p.lineTo(tile * 2, -tile * 2);
+  p.stroke();
+  hazardStripePattern = ctx.createPattern(pat, 'repeat');
+  return hazardStripePattern;
+}
+
+/**
+ * マス外周に黒黄の縞模様（危険色の縁取り）
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} x
+ * @param {number} y
+ * @param {number} size
+ * @param {number} [band]
+ */
+function drawHazardBorder(ctx, x, y, size, band = 5) {
+  const pattern = getHazardStripePattern(ctx);
+  if (!pattern) return;
+
+  ctx.save();
   ctx.beginPath();
-  ctx.moveTo(cx - half, cy - half);
-  ctx.lineTo(cx + half, cy + half);
-  ctx.moveTo(cx + half, cy - half);
-  ctx.lineTo(cx - half, cy + half);
-  ctx.stroke();
+  ctx.rect(x, y, size, size);
+  ctx.rect(x + band, y + band, size - band * 2, size - band * 2);
+  ctx.clip('evenodd');
+  ctx.fillStyle = pattern;
+  ctx.fillRect(x - size, y - size, size * 3, size * 3);
+  ctx.restore();
+
+  ctx.strokeStyle = '#111827';
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(x + 0.75, y + 0.75, size - 1.5, size - 1.5);
 }
 
 /**
@@ -32,7 +68,7 @@ function drawTileDecor(ctx, id, x, y, size = TILE_SIZE) {
   else if (id === 1) drawBounceTile(ctx, x, y, size);
 }
 
-/** 線即死：水色の線＋赤バツ */
+/** 線即死：水色の線＋縁に黒黄の縞 */
 function drawLinkDeathTile(ctx, x, y, size) {
   const s = size;
   const cx = x + s * 0.5;
@@ -56,14 +92,10 @@ function drawLinkDeathTile(ctx, x, y, size) {
   ctx.lineTo(x + s - 5, cy);
   ctx.stroke();
 
-  drawRedX(ctx, cx, cy, s * 0.22, 3.5);
-
-  ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
+  drawHazardBorder(ctx, x, y, s);
 }
 
-/** 体即死：A・Bの上に赤バツ */
+/** 体即死：A・Bマーク＋縁に黒黄の縞 */
 function drawBodyDeathTile(ctx, x, y, size) {
   const s = size;
   const cx = x + s * 0.5;
@@ -91,20 +123,27 @@ function drawBodyDeathTile(ctx, x, y, size) {
     ctx.textBaseline = 'middle';
     ctx.fillText(item.letter, bx, by + 1);
 
-    drawRedX(ctx, bx, by - s * 0.28, s * 0.13, 2.5);
   }
 
-  ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
+  drawHazardBorder(ctx, x, y, s);
 }
 
+/** ゴール：白と黒のチェッカー（旗の格子） */
 function drawGoalTile(ctx, x, y, size) {
-  ctx.fillStyle = '#fff';
-  ctx.font = `bold ${Math.floor(size * 0.45)}px sans-serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('G', x + size * 0.5, y + size * 0.55);
+  const s = size;
+  const cells = 4;
+  const cell = s / cells;
+
+  for (let row = 0; row < cells; row++) {
+    for (let col = 0; col < cells; col++) {
+      ctx.fillStyle = (row + col) % 2 === 0 ? '#ffffff' : '#111827';
+      ctx.fillRect(x + col * cell, y + row * cell, cell, cell);
+    }
+  }
+
+  ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(x + 0.5, y + 0.5, s - 1, s - 1);
 }
 
 /** 中間地点タイル（マス全体＋枠＋CP） */
@@ -162,7 +201,7 @@ function drawTileCell(ctx, id, x, y) {
     ctx.strokeRect(x + 0.5, y + 0.5, TILE_SIZE - 1, TILE_SIZE - 1);
     return;
   }
-  if (id === TILE_LINK_DEATH || id === TILE_BODY_DEATH || id === 5) {
+  if (id === TILE_LINK_DEATH || id === TILE_BODY_DEATH || id === 3 || id === 5) {
     drawTileDecor(ctx, id, x, y, TILE_SIZE);
     return;
   }

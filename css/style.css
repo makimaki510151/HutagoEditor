@@ -394,11 +394,55 @@ html, body {
   content: "▾ ";
 }
 
-.help ul {
+.help ul,
+.controls-list {
   margin: 0 0 8px;
   padding-left: 18px;
   font-size: 0.85rem;
   line-height: 1.6;
+}
+
+.controls-lead {
+  margin: 0 0 8px;
+}
+
+.controls-list li {
+  margin-bottom: 6px;
+}
+
+.controls-kind {
+  display: inline-block;
+  min-width: 5.5em;
+  font-weight: 600;
+  color: #0369a1;
+}
+
+.pad-label {
+  white-space: nowrap;
+}
+
+.pad-dpad {
+  display: inline-block;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: #e2e8f0;
+  border: 1px solid var(--border);
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+}
+
+.pad-face {
+  display: inline-block;
+  min-width: 1.25em;
+  text-align: center;
+  padding: 0 5px;
+  border-radius: 50%;
+  background: #334155;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  vertical-align: baseline;
 }
 
 kbd {
