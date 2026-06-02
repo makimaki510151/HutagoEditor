@@ -1,27 +1,19 @@
 /** @typedef {{ cols: number, rows: number, tiles: number[], orbitRadius: number, orbitSpeed: number, spawn: { ax: number, ay: number, bx: number, by: number }, checkpoint?: { x: number, y: number } | null, name?: string }} LevelData */
 
+/** @param {number} col @param {number} row */
+function checkpointCellKey(col, row) {
+  return `${col},${row}`;
+}
+
 /** @param {LevelData} level */
 function syncCheckpointFromTiles(level) {
-  for (let row = 0; row < level.rows; row++) {
-    for (let col = 0; col < level.cols; col++) {
-      if (level.tiles[row * level.cols + col] === 5) {
-        level.checkpoint = {
-          x: col * TILE_SIZE + TILE_SIZE / 2,
-          y: row * TILE_SIZE + TILE_SIZE / 2,
-        };
-        return;
-      }
-    }
-  }
   if (level.checkpoint) {
     const col = Math.max(0, Math.min(level.cols - 1, Math.floor(level.checkpoint.x / TILE_SIZE)));
     const row = Math.max(0, Math.min(level.rows - 1, Math.floor(level.checkpoint.y / TILE_SIZE)));
-    level.tiles[row * level.cols + col] = 5;
-    level.checkpoint = {
-      x: col * TILE_SIZE + TILE_SIZE / 2,
-      y: row * TILE_SIZE + TILE_SIZE / 2,
-    };
+    const idx = row * level.cols + col;
+    if (level.tiles[idx] !== 5) level.tiles[idx] = 5;
   }
+  delete level.checkpoint;
 }
 
 /** @param {LevelData} raw */

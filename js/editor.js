@@ -218,21 +218,11 @@ class LevelEditor {
     if (id === 4) return;
 
     if (id === 5) {
-      this.level.checkpoint = {
-        x: col * TILE_SIZE + TILE_SIZE / 2,
-        y: row * TILE_SIZE + TILE_SIZE / 2,
-      };
       this.level.tiles[idx] = 5;
     } else if (id !== 0) {
       this.level.tiles[idx] = id;
     } else {
       this.level.tiles[idx] = 0;
-      if (this.level.checkpoint) {
-        const cp = this.level.checkpoint;
-        if (Math.floor(cp.x / TILE_SIZE) === col && Math.floor(cp.y / TILE_SIZE) === row) {
-          this.level.checkpoint = null;
-        }
-      }
     }
 
     this.draw();
@@ -241,7 +231,6 @@ class LevelEditor {
 
   fillEmpty() {
     this.level.tiles.fill(0);
-    this.level.checkpoint = null;
     this.draw();
     this.onLevelChange(this.level);
   }
@@ -259,7 +248,6 @@ class LevelEditor {
       }
     }
     next.spawn = { ...this.level.spawn };
-    next.checkpoint = this.level.checkpoint;
     next.orbitRadius = this.level.orbitRadius;
     next.orbitSpeed = this.level.orbitSpeed;
     next.name = this.level.name;

@@ -27,7 +27,8 @@ class HutagoGame {
     this.orbitRadius = 120;
     this.orbitSpeed = 2.2;
     this.respawn = null;
-    this.checkpointSaved = false;
+    /** @type {string | null} */
+    this.activeCheckpointKey = null;
     this.checkpointFx = 0;
     this.checkpointFxPos = { x: 0, y: 0 };
     this._gamepadPrev = { left: false, right: false, x: false };
@@ -45,7 +46,7 @@ class HutagoGame {
     this.orbitRadius = this.level.orbitRadius;
     this.orbitSpeed = this.level.orbitSpeed;
     this.respawn = null;
-    this.checkpointSaved = false;
+    this.activeCheckpointKey = null;
     this.checkpointFx = 0;
     this.reset(false);
     this.onStatus('Q=左回り切替 / E=右回り切替', '');
@@ -54,7 +55,7 @@ class HutagoGame {
   reset(useCheckpoint) {
     if (!this.level) return;
     if (!useCheckpoint || !this.respawn) {
-      this.checkpointSaved = false;
+      this.activeCheckpointKey = null;
       this.respawn = null;
     }
     const src = useCheckpoint && this.respawn ? this.respawn : this.level.spawn;
@@ -288,14 +289,20 @@ class HutagoGame {
     this._gamepadPrev = { left, right, x: xBtn };
   }
 
-  /** @param {number} x @param {number} y */
-  activateCheckpoint(x, y) {
-    if (this.checkpointSaved || this.state !== 'playing') return;
-    this.checkpointSaved = true;
+  /** @param {number} col @param {number} row @param {number} x @param {number} y */
+  activateCheckpoint(col, row, x, y) {
+    if (this.state !== 'playing') return;
+    const key = checkpointCellKey(col, row);
+    if (this.activeCheckpointKey === key) return;
+    const updated = this.activeCheckpointKey != null;
+    this.activeCheckpointKey = key;
     this.respawn = { ax: this.ax, ay: this.ay, bx: this.bx, by: this.by };
     this.checkpointFxPos = { x, y };
     this.checkpointFx = 1.4;
-    this.onStatus('中間地点を記録しました！ Rでここから再開', 'checkpoint');
+    this.onStatus(
+      updated ? '中間地点を更新しました！ Rでここから再開' : '中間地点を記録しました！ Rでここから再開',
+      'checkpoint',
+    );
   }
 
   update(dt) {
@@ -417,20 +424,10 @@ class HutagoGame {
         this.onStatus('ゴール！おめでとう！', 'win');
         return;
       }
-      if (id === 5 && !this.checkpointSaved) {
+      if (id === 5) {
         const cx = col * TILE_SIZE + TILE_SIZE / 2;
         const cy = row * TILE_SIZE + TILE_SIZE / 2;
-        this.activateCheckpoint(cx, cy);
-      }
-    }
-
-    if (this.level.checkpoint && !this.checkpointSaved) {
-      const cp = this.level.checkpoint;
-      if (Math.min(
-        Math.hypot(this.ax - cp.x, this.ay - cp.y),
-        Math.hypot(this.bx - cp.x, this.by - cp.y),
-      ) < TILE_SIZE) {
-        this.activateCheckpoint(cp.x, cp.y);
+        this.activateCheckpoint(col, row, cx, cy);
       }
     }
   }
@@ -551,7 +548,7 @@ class HutagoGame {
     for (let row = startRow; row < endRow; row++) {
       for (let col = startCol; col < endCol; col++) {
         const id = tiles[row * cols + col];
-        if (id === 5 && this.checkpointSaved) continue;
+        if (id === 5 && this.activeCheckpointKey === checkpointCellKey(col, row)) continue;
         drawTileCell(this.ctx, id, col * TILE_SIZE, row * TILE_SIZE);
       }
     }
@@ -592,10 +589,11 @@ class HutagoGame {
     const ctx = this.ctx;
     const orb = this.pivot === 'A' ? 'B' : 'A';
     const pivotLabel = `${this.pivot === 'A' ? 'A' : 'B'}が軸 → ${orb}が周回`;
-    const label = this.checkpointSaved ? `${pivotLabel} ｜中間地点✓` : pivotLabel;
+    const hasCheckpoint = this.activeCheckpointKey != null;
+    const label = hasCheckpoint ? `${pivotLabel} ｜中間地点✓` : pivotLabel;
     ctx.fillStyle = 'rgba(255,255,255,0.9)';
-    ctx.fillRect(8, 8, this.checkpointSaved ? 260 : 200, 28);
-    ctx.fillStyle = this.checkpointSaved ? '#15803d' : '#334155';
+    ctx.fillRect(8, 8, hasCheckpoint ? 260 : 200, 28);
+    ctx.fillStyle = hasCheckpoint ? '#15803d' : '#334155';
     ctx.font = '13px sans-serif';
     ctx.textAlign = 'left';
     ctx.fillText(label, 16, 27);
